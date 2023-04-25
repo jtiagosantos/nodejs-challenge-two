@@ -1,0 +1,16 @@
+{
+  "name": "daily-diet-api",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "node build/server.js",
+    "build": "tsup src --out-dir build"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^18.16.0",
+    "tsup": "^6.7.0",
+    "tsx": "^3.12.6",
+    "typescript": "^5.0.4"
+  }
+}
