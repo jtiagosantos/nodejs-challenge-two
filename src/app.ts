@@ -2,7 +2,7 @@ import fastify from 'fastify';
 import cookie from '@fastify/cookie';
 
 import { logs } from './logs';
-import { dietsRoutes } from './modules/diets/diets.routes';
+import { dietsRoutes } from './modules/diet/diets.routes';
 
 export const app = fastify();
 
