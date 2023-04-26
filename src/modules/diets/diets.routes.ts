@@ -144,4 +144,22 @@ export const dietsRoutes = async (app: FastifyInstance) => {
       }
     },
   );
+
+  app.get(
+    '/',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request, reply) => {
+      try {
+        const sessionId = request.cookies.sessionId as string;
+
+        const diets = await knex('diets').where('session_id', '=', sessionId).select();
+
+        reply.send({ diets });
+      } catch (error) {
+        reply.status(500).send(error);
+      }
+    },
+  );
 };
