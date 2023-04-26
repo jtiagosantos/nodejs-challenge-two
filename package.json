@@ -5,6 +5,7 @@
     "dev": "tsx watch src/server.ts",
     "start": "node build/server.js",
     "build": "tsup src --out-dir build",
+    "knex": "node --no-warnings --loader tsx ./node_modules/.bin/knex",
     "lint:check": "npx eslint \"src/**/*.ts\"",
     "lint:fix": "npx eslint \"src/**/*.ts\" --fix"
   },
@@ -17,6 +18,7 @@
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.2.1",
     "prettier": "^2.8.8",
+    "sqlite3": "^5.1.6",
     "tsup": "^6.7.0",
     "tsx": "^3.12.6",
     "typescript": "^5.0.4"
@@ -24,6 +26,7 @@
   "dependencies": {
     "dotenv": "^16.0.3",
     "fastify": "^4.15.0",
+    "knex": "^2.4.2",
     "zod": "^3.21.4"
   }
 }
