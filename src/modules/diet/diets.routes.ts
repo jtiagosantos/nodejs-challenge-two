@@ -14,6 +14,7 @@ import {
   updateOneDietRequestParamsSchema,
 } from './schemas/update-one-diet.schema';
 import { deleteOneDietRequestParamsSchema } from './schemas/delete-one-diet.schema';
+import { findOneDietRequestParamsSchema } from './schemas/find-one-diet.schema';
 
 export const dietsRoutes = async (app: FastifyInstance) => {
   app.post('/', async (request, reply) => {
@@ -158,6 +159,40 @@ export const dietsRoutes = async (app: FastifyInstance) => {
 
         reply.send({ diets });
       } catch (error) {
+        reply.status(500).send(error);
+      }
+    },
+  );
+
+  app.get(
+    '/:dietId',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request, reply) => {
+      try {
+        const { dietId } = findOneDietRequestParamsSchema.parse(request.params);
+
+        const diet = await knex('diets').where('id', '=', dietId).select('*').first();
+
+        if (!diet?.session_id) {
+          return reply.status(404).send({ error: 'Diet not found' });
+        }
+
+        const { sessionId } = request.cookies;
+
+        if (sessionId !== diet.session_id) {
+          return reply.status(401).send({ error: 'Unauthorized' });
+        }
+
+        reply.send(diet);
+      } catch (error) {
+        if (error instanceof ZodError) {
+          return reply
+            .status(400)
+            .send({ error: error.errors.map((error) => error.message) });
+        }
+
         reply.status(500).send(error);
       }
     },
