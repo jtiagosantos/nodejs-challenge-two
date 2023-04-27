@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const updateOneDietBodySchema = z
+export const updateOneMealBodySchema = z
   .object({
     name: z.string().optional(),
     description: z.string().optional(),
@@ -13,8 +13,8 @@ export const updateOneDietBodySchema = z
   })
   .optional();
 
-export const updateOneDietRequestParamsSchema = z.object({
-  dietId: z
-    .string({ required_error: 'dietId is a required request param' })
-    .uuid({ message: 'dietId should be a UUID' }),
+export const updateOneMealRequestParamsSchema = z.object({
+  mealId: z
+    .string({ required_error: 'mealId is a required request param' })
+    .uuid({ message: 'mealId should be a UUID' }),
 });

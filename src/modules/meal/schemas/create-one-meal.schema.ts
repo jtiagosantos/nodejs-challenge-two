@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const createOneDietBodySchema = z.object(
+export const createOneMealBodySchema = z.object(
   {
     name: z.string({ required_error: 'name is a required field' }),
     description: z.string({ required_error: 'description is a required field' }),

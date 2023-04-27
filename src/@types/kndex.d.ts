@@ -1,7 +1,7 @@
 import 'knex';
 
 declare module 'knex/types/tables' {
-  interface Diets {
+  interface Meals {
     id: string;
     session_id: string;
     name: string;
@@ -11,6 +11,6 @@ declare module 'knex/types/tables' {
   }
 
   interface Tables {
-    diets: Diets;
+    meals: Meals;
   }
 }
