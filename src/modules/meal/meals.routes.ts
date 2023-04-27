@@ -8,18 +8,18 @@ import { checkSessionIdExists } from '../../middlewares/check-session-id-exists'
 
 import { filterTruthyValuesOfObject } from '../../helpers/filter-truthy-values-of-object';
 
-import { createOneDietBodySchema } from './schemas/create-one-diet.schema';
+import { createOneMealBodySchema } from './schemas/create-one-meal.schema';
 import {
-  updateOneDietBodySchema,
-  updateOneDietRequestParamsSchema,
-} from './schemas/update-one-diet.schema';
-import { deleteOneDietRequestParamsSchema } from './schemas/delete-one-diet.schema';
-import { findOneDietRequestParamsSchema } from './schemas/find-one-diet.schema';
+  updateOneMealBodySchema,
+  updateOneMealRequestParamsSchema,
+} from './schemas/update-one-meal.schema';
+import { deleteOneMealRequestParamsSchema } from './schemas/delete-one-meal.schema';
+import { findOneMealRequestParamsSchema } from './schemas/find-one-meal.schema';
 
-export const dietsRoutes = async (app: FastifyInstance) => {
+export const mealsRoutes = async (app: FastifyInstance) => {
   app.post('/', async (request, reply) => {
     try {
-      const { name, description, datetime, isDiet } = createOneDietBodySchema.parse(
+      const { name, description, datetime, isDiet } = createOneMealBodySchema.parse(
         request.body,
       );
 
@@ -34,7 +34,7 @@ export const dietsRoutes = async (app: FastifyInstance) => {
         });
       }
 
-      await knex('diets').insert({
+      await knex('meals').insert({
         id: randomUUID(),
         session_id: sessionId,
         name,
@@ -56,43 +56,43 @@ export const dietsRoutes = async (app: FastifyInstance) => {
   });
 
   app.put(
-    '/:dietId',
+    '/:mealId',
     {
       preHandler: [checkSessionIdExists],
     },
     async (request, reply) => {
       try {
-        const { dietId } = updateOneDietRequestParamsSchema.parse(request.params);
-        const body = updateOneDietBodySchema.parse(request.body);
+        const { mealId } = updateOneMealRequestParamsSchema.parse(request.params);
+        const body = updateOneMealBodySchema.parse(request.body);
 
         if (!body) {
           return reply.status(200).send();
         }
 
-        const diet = await knex('diets')
-          .where('id', '=', dietId)
+        const meal = await knex('meals')
+          .where('id', '=', mealId)
           .select('session_id')
           .first();
 
-        if (!diet?.session_id) {
-          return reply.status(404).send({ error: 'Diet not found' });
+        if (!meal?.session_id) {
+          return reply.status(404).send({ error: 'Meal not found' });
         }
 
         const { sessionId } = request.cookies;
 
-        if (sessionId !== diet.session_id) {
+        if (sessionId !== meal.session_id) {
           return reply.status(401).send({ error: 'Unauthorized' });
         }
 
-        const rawDiet = {
+        const rawMeal = {
           name: body?.name,
           description: body?.description,
           datetime: body?.datetime,
           is_diet: body?.isDiet,
         };
-        const updatedDiet = filterTruthyValuesOfObject(rawDiet);
+        const updatedDiet = filterTruthyValuesOfObject(rawMeal);
 
-        await knex('diets').where('id', dietId).update(updatedDiet);
+        await knex('meals').where('id', mealId).update(updatedDiet);
 
         reply.status(204).send();
       } catch (error) {
@@ -108,30 +108,30 @@ export const dietsRoutes = async (app: FastifyInstance) => {
   );
 
   app.delete(
-    '/:dietId',
+    '/:mealId',
     {
       preHandler: [checkSessionIdExists],
     },
     async (request, reply) => {
       try {
-        const { dietId } = deleteOneDietRequestParamsSchema.parse(request.params);
+        const { mealId } = deleteOneMealRequestParamsSchema.parse(request.params);
 
-        const diet = await knex('diets')
-          .where('id', '=', dietId)
+        const meal = await knex('meals')
+          .where('id', '=', mealId)
           .select('session_id')
           .first();
 
-        if (!diet?.session_id) {
-          return reply.status(404).send({ error: 'Diet not found' });
+        if (!meal?.session_id) {
+          return reply.status(404).send({ error: 'Meal not found' });
         }
 
         const { sessionId } = request.cookies;
 
-        if (sessionId !== diet.session_id) {
+        if (sessionId !== meal.session_id) {
           return reply.status(401).send({ error: 'Unauthorized' });
         }
 
-        await knex('diets').where('id', '=', dietId).del();
+        await knex('meals').where('id', '=', mealId).del();
 
         reply.status(204).send();
       } catch (error) {
@@ -155,9 +155,9 @@ export const dietsRoutes = async (app: FastifyInstance) => {
       try {
         const sessionId = request.cookies.sessionId as string;
 
-        const diets = await knex('diets').where('session_id', '=', sessionId).select();
+        const meals = await knex('meals').where('session_id', '=', sessionId).select();
 
-        reply.send({ diets });
+        reply.send({ meals });
       } catch (error) {
         reply.status(500).send(error);
       }
@@ -165,27 +165,27 @@ export const dietsRoutes = async (app: FastifyInstance) => {
   );
 
   app.get(
-    '/:dietId',
+    '/:mealId',
     {
       preHandler: [checkSessionIdExists],
     },
     async (request, reply) => {
       try {
-        const { dietId } = findOneDietRequestParamsSchema.parse(request.params);
+        const { mealId } = findOneMealRequestParamsSchema.parse(request.params);
 
-        const diet = await knex('diets').where('id', '=', dietId).select('*').first();
+        const meal = await knex('meals').where('id', '=', mealId).select('*').first();
 
-        if (!diet?.session_id) {
-          return reply.status(404).send({ error: 'Diet not found' });
+        if (!meal?.session_id) {
+          return reply.status(404).send({ error: 'Meal not found' });
         }
 
         const { sessionId } = request.cookies;
 
-        if (sessionId !== diet.session_id) {
+        if (sessionId !== meal.session_id) {
           return reply.status(401).send({ error: 'Unauthorized' });
         }
 
-        reply.send(diet);
+        reply.send(meal);
       } catch (error) {
         if (error instanceof ZodError) {
           return reply
@@ -213,12 +213,12 @@ export const dietsRoutes = async (app: FastifyInstance) => {
             FROM (
               SELECT
                 COUNT(*) OVER (
-                  PARTITION BY D.is_diet
-                  ORDER BY D.is_diet ASC
+                  PARTITION BY M.is_diet
+                  ORDER BY M.is_diet ASC
                 ) AS count,
-                D.is_diet AS isDiet
-              FROM diets AS D
-              WHERE D.session_id = ?
+                M.is_diet AS isDiet
+              FROM meals AS M
+              WHERE M.session_id = ?
             )
             GROUP BY isDiet
           `,
@@ -228,12 +228,12 @@ export const dietsRoutes = async (app: FastifyInstance) => {
         const offDietMeals = rawCount[0]?.count ?? 0;
         const mealsWithinTheDiet = rawCount[1]?.count ?? 0;
 
-        const diets = await knex('diets').where('session_id', '=', sessionId).select();
+        const meals = await knex('meals').where('session_id', '=', sessionId).select();
 
         let bestSequenceWithinTheDiet = 0;
         let control = 0;
 
-        diets.forEach((diet) => {
+        meals.forEach((diet) => {
           if (diet.is_diet) {
             control++;
 
