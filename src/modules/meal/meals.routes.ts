@@ -207,9 +207,9 @@ export const mealsRoutes = async (app: FastifyInstance) => {
       try {
         const sessionId = request.cookies.sessionId as string;
 
-        const rawCount = (await knex.raw(
+        const rawResult = (await knex.raw(
           `
-            SELECT count 
+            SELECT count, isDiet
             FROM (
               SELECT
                 COUNT(*) OVER (
@@ -223,10 +223,26 @@ export const mealsRoutes = async (app: FastifyInstance) => {
             GROUP BY isDiet
           `,
           [sessionId],
-        )) as Array<{ count: number }>;
+        )) as Array<{ count: number; isDiet: 0 | 1 }>;
 
-        const offDietMeals = rawCount[0]?.count ?? 0;
-        const mealsWithinTheDiet = rawCount[1]?.count ?? 0;
+        let offDietMeals = 0;
+        let mealsWithinTheDiet = 0;
+
+        if (rawResult.length === 2) {
+          offDietMeals = rawResult[0].count;
+          mealsWithinTheDiet = rawResult[1].count;
+        } else if (rawResult.length === 1) {
+          const [{ count, isDiet }] = rawResult;
+
+          switch (isDiet) {
+            case 0:
+              offDietMeals = count;
+              break;
+            case 1:
+              mealsWithinTheDiet = count;
+              break;
+          }
+        }
 
         const meals = await knex('meals').where('session_id', '=', sessionId).select();
 
