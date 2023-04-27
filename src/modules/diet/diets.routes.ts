@@ -197,4 +197,65 @@ export const dietsRoutes = async (app: FastifyInstance) => {
       }
     },
   );
+
+  app.get(
+    '/metrics',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request, reply) => {
+      try {
+        const sessionId = request.cookies.sessionId as string;
+
+        const rawCount = (await knex.raw(
+          `
+            SELECT count 
+            FROM (
+              SELECT
+                COUNT(*) OVER (
+                  PARTITION BY D.is_diet
+                  ORDER BY D.is_diet ASC
+                ) AS count,
+                D.is_diet AS isDiet
+              FROM diets AS D
+              WHERE D.session_id = ?
+            )
+            GROUP BY isDiet
+          `,
+          [sessionId],
+        )) as Array<{ count: number }>;
+
+        const offDietMeals = rawCount[0]?.count ?? 0;
+        const mealsWithinTheDiet = rawCount[1]?.count ?? 0;
+
+        const diets = await knex('diets').where('session_id', '=', sessionId).select();
+
+        let bestSequenceWithinTheDiet = 0;
+        let control = 0;
+
+        diets.forEach((diet) => {
+          if (diet.is_diet) {
+            control++;
+
+            if (control > bestSequenceWithinTheDiet) {
+              bestSequenceWithinTheDiet = control;
+            }
+          } else {
+            control = 0;
+          }
+        });
+
+        const metrics = {
+          totalMeals: mealsWithinTheDiet + offDietMeals,
+          mealsWithinTheDiet,
+          offDietMeals,
+          bestSequenceWithinTheDiet,
+        };
+
+        reply.send(metrics);
+      } catch (error) {
+        reply.status(500).send(error);
+      }
+    },
+  );
 };
