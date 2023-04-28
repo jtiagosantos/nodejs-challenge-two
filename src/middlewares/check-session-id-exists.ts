@@ -1,12 +1,10 @@
-import { FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyRequest } from 'fastify';
+import { UnauthorizedError } from '../errors/unauthorized.error';
 
-export const checkSessionIdExists = async (
-  request: FastifyRequest,
-  reply: FastifyReply,
-) => {
-  const sesionId = request.cookies.sessionId;
+export const checkSessionIdExists = async (request: FastifyRequest) => {
+  const sessionId = request.cookies.sessionId;
 
-  if (!sesionId) {
-    return reply.status(401).send({ error: 'Unauthorized' });
+  if (!sessionId) {
+    throw new UnauthorizedError();
   }
 };
