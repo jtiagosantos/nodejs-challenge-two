@@ -166,37 +166,38 @@ export const mealsRoutes = async (app: FastifyInstance) => {
 
       const rawResult = (await knex.raw(
         `
-            SELECT isDiet, count
+            SELECT is_diet, CAST(count AS INT)
             FROM (
               SELECT
                 COUNT(*) OVER (
                   PARTITION BY M.is_diet
                   ORDER BY M.is_diet ASC
                 ) AS count,
-                M.is_diet AS isDiet
+                M.is_diet
               FROM meals AS M
               WHERE M.session_id = ?
-            )
-            GROUP BY isDiet
+            ) AS count_by_diet_column
+            GROUP BY is_diet, CAST(count AS INT)
           `,
         [sessionId],
-      )) as Array<{ count: number; isDiet: 0 | 1 }>;
+      )) as { rows: Array<{ count: number; is_diet: boolean }> };
 
+      const { rows } = rawResult;
       let offDietMeals = 0;
       let mealsWithinTheDiet = 0;
 
-      if (rawResult.length === 2) {
-        offDietMeals = rawResult[0].count;
-        mealsWithinTheDiet = rawResult[1].count;
-      } else if (rawResult.length === 1) {
-        const [{ count, isDiet }] = rawResult;
+      if (rows.length === 2) {
+        offDietMeals = rows[0].count;
+        mealsWithinTheDiet = rows[1].count;
+      } else if (rows.length === 1) {
+        const [{ count, is_diet }] = rows;
 
-        switch (isDiet) {
-          case 0:
-            offDietMeals = count;
-            break;
-          case 1:
+        switch (is_diet) {
+          case true:
             mealsWithinTheDiet = count;
+            break;
+          case false:
+            offDietMeals = count;
             break;
         }
       }

@@ -2,11 +2,14 @@ import { knex as setupKnex, Knex } from 'knex';
 import { env } from '../env';
 
 export const config = {
-  client: 'sqlite',
+  client: 'pg',
   connection: {
-    filename: env.DATABASE_URL,
+    host: env.DATABASE_HOST,
+    port: env.DATABASE_PORT,
+    user: env.DATABASE_USER,
+    password: env.DATABASE_PASSWORD,
+    database: env.DATABASE_NAME,
   },
-  useNullAsDefault: true,
   migrations: {
     extension: 'ts',
     directory: './database/migrations',

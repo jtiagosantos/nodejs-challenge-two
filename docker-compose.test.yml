@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  daily-diet-api-test:
+    image: bitnami/postgresql
+    ports:
+      - 5555:5432
+    environment:
+      - POSTGRESQL_USERNAME=admin
+      - POSTGRESQL_PASSWORD=admin
+      - POSTGRESQL_DATABASE=daily_diet_test

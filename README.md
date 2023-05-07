@@ -55,14 +55,26 @@ $ cd nodejs-challenge-two
 $ npm i
 ```
 
-3️⃣ Define environment variables:
+3️⃣ Start database:
+
+```bash
+$ docker-compose up -d
+```
+
+4️⃣ Define environment variables (.env):
 
 ```bash
 NODE_ENV=
-DATABASE_URL=
+
+# DATABASE
+DATABASE_HOST=
+DATABASE_PORT=
+DATABASE_USER=
+DATABASE_PASSWORD=
+DATABASE_NAME=
 ```
 
-4️⃣ Start project:
+5️⃣ Start project:
 
 ```bash
 $ npm run dev
@@ -75,6 +87,25 @@ $ npm run dev
 <br>
 
 ## ⚡ Run Tests
+
+1️⃣ Start test database:
+
+```bash
+$ docker-compose -f docker-compose.test.yml up -d
+```
+
+2️⃣ Define environment variables (.env.test):
+
+```bash
+# DATABASE
+DATABASE_HOST=
+DATABASE_PORT=
+DATABASE_USER=
+DATABASE_PASSWORD=
+DATABASE_NAME=
+```
+
+3️⃣ Run tests:
 
 ```bash
 $ npm run test
@@ -90,7 +121,7 @@ The following tools were used in the construction of project:
 - **[Typescript](https://www.typescriptlang.org/)**
 - **[Fastify](https://www.fastify.io/)**
 - **[Knex.js](https://knexjs.org/)**
-- **[SQLite](https://sqlite.org/index.html)**
+- **[PostgreSQL](https://www.postgresql.org/)**
 - **[Zod](https://github.com/colinhacks/zod)**
 - **[Tsx](https://www.npmjs.com/package/tsx)**
 - **[Tsup](https://tsup.egoist.dev/)**

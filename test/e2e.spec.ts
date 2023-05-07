@@ -86,14 +86,30 @@ describe('Meal routes', () => {
 
     const cookies = createMealResponse.get('Set-Cookie');
 
+    await request(server)
+      .post('/meals')
+      .send({
+        name: 'Batata frita',
+        description: 'Batata frita crocante',
+        datetime,
+        isDiet: false,
+      })
+      .set('Cookie', cookies);
+
     const response = await request(server).get('/meals').set('Cookie', cookies);
 
     expect(response.body.meals).toEqual([
       expect.objectContaining({
         name: 'Salada',
         description: 'Salada saudável de legumes',
-        datetime: datetime.getTime(),
-        is_diet: 1,
+        datetime: datetime.toISOString(),
+        is_diet: true,
+      }),
+      expect.objectContaining({
+        name: 'Batata frita',
+        description: 'Batata frita crocante',
+        datetime: datetime.toISOString(),
+        is_diet: false,
       }),
     ]);
   });
@@ -127,8 +143,8 @@ describe('Meal routes', () => {
         id: mealId,
         name: 'Salada',
         description: 'Salada saudável de legumes',
-        datetime: datetime.getTime(),
-        is_diet: 1,
+        datetime: datetime.toISOString(),
+        is_diet: true,
       }),
     );
 
@@ -248,7 +264,7 @@ describe('Meal routes', () => {
         id: mealId,
         name: 'Batata frita',
         description: 'Batata frita crocante',
-        is_diet: 0,
+        is_diet: false,
       }),
     );
   });
